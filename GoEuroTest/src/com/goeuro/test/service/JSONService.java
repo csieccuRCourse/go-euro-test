@@ -1,18 +1,36 @@
 package com.goeuro.test.service;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Properties;
 
 import org.json.JSONArray;
 
+import com.goeuro.test.util.ApplicationUtilities;
+
+/**
+ * JSONService is responsible for different JSON operations. 
+ * It handles urlBase String since the application asks for retrieving JSON Stream from a given url.
+ * To make maintenance as easy as possible, url is in a Properties file.
+ * 
+ * @author Farouk
+ * @version 1.0
+ */
 public class JSONService {
 
 	private String urlBase = "http://api.goeuro.com/api/v2/position/suggest/en/";
+	
+	/**
+	 * Public constructor initializes {@link #urlBase} value. It loads it from Properties file.
+	 */
+	public JSONService() {
+		Properties properties = ApplicationUtilities.loadProperties();
+		if ((String) properties.getProperty("url") != null)
+			urlBase =  (String) properties.getProperty("url") ;
+	}
+	
+	//--------------------- GETTERS & SETTERS --------------------------
 	
 	public String getUrlBase() {
 		return urlBase;
@@ -22,12 +40,16 @@ public class JSONService {
 		this.urlBase = urlBase;
 	}
 	
+	//------------------ END OF GETTERS & SETTERS ----------------------
+	
+	/**
+	 * Retrieve JSON Stream.
+	 * @param STRING concatenated to {@link #urlBase} used to retrieve JSON stream.
+	 * @return JSON Stream
+	 * @throws Exception
+	 */
 	public String getJSONObject(String string) throws Exception {
 		StringBuilder json = new StringBuilder();
-		
-		Properties properties = loadProperties();
-		if ((String) properties.getProperty("url") != null)
-			urlBase =  (String) properties.getProperty("url") ;
 		
 		 try {
 	            URL url = new URL(this.urlBase+string);
@@ -43,15 +65,17 @@ public class JSONService {
 		 return json.toString();
 	}
 	
+	/**
+	 * Retrieve JSON Stream and transforms it into JSONArray object.
+	 * @param STRING concatenated to {@link #urlBase} used to retrieve JSON stream.
+	 * @return JSON Stream
+	 * @throws Exception
+	 */
 	public JSONArray getJSONArray(String string) throws Exception {
 		StringBuilder json = new StringBuilder();
 		JSONArray array = null;
 		
-		Properties properties = loadProperties();
-		if ((String) properties.getProperty("url") != null)
-			urlBase =  (String) properties.getProperty("url") ;
-		
-		 try {
+		try {
 	            URL url = new URL(this.urlBase+string);
 	            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
 	            String strTemp = "";
@@ -68,20 +92,4 @@ public class JSONService {
 		 return array;
 	}
 	
-	private Properties loadProperties() {
-		Properties properties = new Properties();
-		FileInputStream file;
-		String path = null;
-		try {
-			path = JSONService.class.getClassLoader().getResource("com//goeuro//test//properties//Parameters.properties").getPath();
-			file = new FileInputStream(path);
-			properties.load(file);
-		} catch (FileNotFoundException e) {
-			properties = null;
-		} catch (IOException e) {
-			properties = null;
-		}
-		
-		return properties;
-	}
 }
